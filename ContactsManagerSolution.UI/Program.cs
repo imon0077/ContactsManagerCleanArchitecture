@@ -63,7 +63,8 @@ if (builder.Environment.IsEnvironment("Test") == false)
     Rotativa.AspNetCore.RotativaConfiguration.Setup("wwwroot", wkhtmltopdfRelativePath: "Rotativa");
 
 app.UseStaticFiles();
-app.UseRouting();
-app.MapControllers();
+app.UseAuthentication(); //Reading Identity Cookie
+app.UseRouting();  //Identifying action method based route
+app.MapControllers(); //Execute filter pipeline (action + filters)
 
 app.Run();
