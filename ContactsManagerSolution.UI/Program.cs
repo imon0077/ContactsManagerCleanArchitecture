@@ -34,7 +34,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => {
 });
 
 //Enable Identity in this project
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
+        options.Password.RequiredLength = 5;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireDigit = false;
+        options.Password.RequiredUniqueChars = 3; // Eg : AB12AB
+    })
     .AddEntityFrameworkStores<ApplicationDbContext>()
 
     .AddDefaultTokenProviders()
@@ -42,6 +48,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
     .AddUserStore<UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid>>()
 
     .AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, Guid>>();
+
 
 builder.Services.AddHttpLogging(options =>
 {
