@@ -9,6 +9,7 @@ using Serilog.AspNetCore;
 using ContactsManager.Core.Domain.IdentityEntities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,15 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
 
     .AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, Guid>>();
 
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build(); //user must authenticated
+});
+
+builder.Services.ConfigureApplicationCookie(options => {
+    options.LoginPath = "/Account/Login";
+});
+
 
 builder.Services.AddHttpLogging(options =>
 {
@@ -70,8 +80,11 @@ if (builder.Environment.IsEnvironment("Test") == false)
     Rotativa.AspNetCore.RotativaConfiguration.Setup("wwwroot", wkhtmltopdfRelativePath: "Rotativa");
 
 app.UseStaticFiles();
-app.UseAuthentication(); //Reading Identity Cookie
+
+
 app.UseRouting();  //Identifying action method based route
+app.UseAuthentication(); //Reading Identity Cookie
+app.UseAuthorization(); // Validates access permission of the user
 app.MapControllers(); //Execute filter pipeline (action + filters)
 
 app.Run();
