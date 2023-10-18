@@ -52,7 +52,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
 
 builder.Services.AddAuthorization(options =>
 {
-    options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build(); //user must authenticated
+    options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build(); //enforce authorization policy (user must be authenticated) for all the action methods
 });
 
 builder.Services.ConfigureApplicationCookie(options => {
