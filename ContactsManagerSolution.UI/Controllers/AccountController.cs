@@ -1,6 +1,7 @@
 ﻿using ContactsManager.Controllers;
 using ContactsManager.Core.Domain.IdentityEntities;
 using ContactsManager.Core.DTO;
+using ContactsManager.Core.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,13 @@ namespace ContactsManager.UI.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
         }
 
 
@@ -49,6 +52,25 @@ namespace ContactsManager.UI.Controllers
 
             if(result.Succeeded)
             {
+                //Check if status of radio button
+                if(registerDTO.UserType == Core.Enums.UserTypeOptions.Admin)
+                {
+                    //Create 'Admin' Role 
+                    if(await _roleManager.FindByNameAsync(UserTypeOptions.Admin.ToString()) is null)
+                    {
+                        ApplicationRole applicationRole = new() { Name = UserTypeOptions.Admin.ToString() };
+                        await _roleManager.CreateAsync(applicationRole);
+                    }
+
+                    //Add the new user into 'Admin' role
+                    await _userManager.AddToRoleAsync(user, UserTypeOptions.Admin.ToString());
+                }
+                else
+                {
+                    //Add the new user into 'User' role
+                    await _userManager.AddToRoleAsync(user, UserTypeOptions.User.ToString());
+                }
+
                 //Sign in
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
